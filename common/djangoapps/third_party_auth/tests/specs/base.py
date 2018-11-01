@@ -120,7 +120,7 @@ class HelperMixin(object):
         """Asserts failure on /login for missing social auth looks right."""
         self.assertEqual(403, response.status_code)
         self.assertIn(
-            "successfully logged into your %s account, but this account isn't linked" % self.provider.name,
+            "successfully logged into your %s account, but this account isn&#39;t linked" % self.provider.name,
             response.content
         )
 
@@ -528,7 +528,7 @@ class IntegrationTest(testutil.TestCase, test.TestCase, HelperMixin):
         request, strategy = self.get_request_and_strategy(
             auth_entry=pipeline.AUTH_ENTRY_LOGIN, redirect_uri='social:complete')
         request.backend.auth_complete = mock.MagicMock(return_value=self.fake_auth_complete(strategy))
-        pipeline.analytics.track = mock.MagicMock()
+        pipeline.segment.track = mock.MagicMock()
         request.user = self.create_user_models_for_existing_account(
             strategy, 'user@example.com', 'password', self.get_username(), skip_social_auth=True)
 
@@ -683,7 +683,7 @@ class IntegrationTest(testutil.TestCase, test.TestCase, HelperMixin):
         request, strategy = self.get_request_and_strategy(
             auth_entry=pipeline.AUTH_ENTRY_LOGIN, redirect_uri='social:complete')
         strategy.request.backend.auth_complete = mock.MagicMock(return_value=self.fake_auth_complete(strategy))
-        pipeline.analytics.track = mock.MagicMock()
+        pipeline.segment.track = mock.MagicMock()
         user = self.create_user_models_for_existing_account(
             strategy, 'user@example.com', 'password', self.get_username())
         self.assert_social_auth_exists_for_user(user, strategy)
