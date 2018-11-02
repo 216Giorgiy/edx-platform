@@ -18,10 +18,7 @@ from lms.djangoapps.courseware.masquerade import (
     get_masquerading_user_group,
 )
 from xmodule.partitions.partitions import Group, UserPartition, UserPartitionError
-from openedx.features.course_duration_limits.config import (
-    CONTENT_TYPE_GATING_FLAG,
-    CONTENT_TYPE_GATING_STUDIO_UI_FLAG,
-)
+from openedx.features.content_type_gating.models import ContentTypeGatingConfig
 
 LOG = logging.getLogger(__name__)
 
@@ -41,7 +38,7 @@ def create_content_gating_partition(course):
     Create and return the Content Gating user partition.
     """
 
-    if not (CONTENT_TYPE_GATING_FLAG.is_enabled() or CONTENT_TYPE_GATING_STUDIO_UI_FLAG.is_enabled()):
+    if not ContentTypeGatingConfig.enabled_for_course(course_key=course.id):
         return None
 
     try:
@@ -106,7 +103,7 @@ class ContentTypeGatingPartitionScheme(object):
         # For now, treat everyone as a Full-access user, until we have the rest of the
         # feature gating logic in place.
 
-        if not CONTENT_TYPE_GATING_FLAG.is_enabled():
+        if not ContentTypeGatingConfig.enabled_for_enrollment(user=user, course_key=course_key):
             return cls.FULL_ACCESS
 
         # If CONTENT_TYPE_GATING is enabled use the following logic to determine whether a user should have FULL_ACCESS

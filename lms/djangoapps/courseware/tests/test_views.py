@@ -63,13 +63,12 @@ from openedx.core.djangolib.testing.utils import get_mock_request
 from openedx.core.lib.gating import api as gating_api
 from openedx.core.lib.tests import attr
 from openedx.core.lib.url_utils import quote_slashes
-from openedx.features.course_duration_limits.config import CONTENT_TYPE_GATING_FLAG
+from openedx.features.content_type_gating.models import ContentTypeGatingConfig
 from openedx.features.course_experience import (
     COURSE_ENABLE_UNENROLLED_ACCESS_FLAG,
     COURSE_OUTLINE_PAGE_FLAG,
     UNIFIED_COURSE_TAB_FLAG,
 )
-from openedx.features.enterprise_support.tests.mixins.enterprise import EnterpriseTestConsentRequired
 from student.models import CourseEnrollment
 from student.tests.factories import TEST_PASSWORD, AdminFactory, CourseEnrollmentFactory, UserFactory
 from util.tests.test_date_utils import fake_pgettext, fake_ugettext
@@ -209,13 +208,13 @@ class IndexQueryTestCase(ModuleStoreTestCase):
     CREATE_USER = False
     NUM_PROBLEMS = 20
 
-    @override_waffle_flag(CONTENT_TYPE_GATING_FLAG, True)
     @ddt.data(
         (ModuleStoreEnum.Type.mongo, 10, 157),
         (ModuleStoreEnum.Type.split, 4, 153),
     )
     @ddt.unpack
     def test_index_query_counts(self, store_type, expected_mongo_query_count, expected_mysql_query_count):
+        ContentTypeGatingConfig.objects.create(enabled=True)
         with self.store.default_store(store_type):
             course = CourseFactory.create()
             with self.store.bulk_operations(course.id):
@@ -1435,7 +1434,6 @@ class ProgressPageTests(ProgressPageBaseTests):
                 resp = self._get_progress_page()
                 self.assertContains(resp, u"Download Your Certificate")
 
-    @override_waffle_flag(CONTENT_TYPE_GATING_FLAG, True)
     @ddt.data(
         (True, 39),
         (False, 38)
@@ -1443,11 +1441,11 @@ class ProgressPageTests(ProgressPageBaseTests):
     @ddt.unpack
     def test_progress_queries_paced_courses(self, self_paced, query_count):
         """Test that query counts remain the same for self-paced and instructor-paced courses."""
+        ContentTypeGatingConfig.objects.create(enabled=True)
         self.setup_course(self_paced=self_paced)
         with self.assertNumQueries(query_count, table_blacklist=QUERY_COUNT_TABLE_BLACKLIST), check_mongo_calls(1):
             self._get_progress_page()
 
-    @override_waffle_flag(CONTENT_TYPE_GATING_FLAG, True)
     @patch.dict(settings.FEATURES, {'ASSUME_ZERO_GRADE_IF_ABSENT_FOR_ALL_TESTS': False})
     @ddt.data(
         (False, 46, 29),
@@ -1455,6 +1453,7 @@ class ProgressPageTests(ProgressPageBaseTests):
     )
     @ddt.unpack
     def test_progress_queries(self, enable_waffle, initial, subsequent):
+        ContentTypeGatingConfig.objects.create(enabled=True)
         self.setup_course()
         with grades_waffle().override(ASSUME_ZERO_GRADE_IF_ABSENT, active=enable_waffle):
             with self.assertNumQueries(

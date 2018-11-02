@@ -15,7 +15,8 @@ from six import text_type
 from django_comment_common.models import assign_default_role
 from django_comment_common.utils import seed_permissions_roles
 from openedx.core.djangoapps.site_configuration.models import SiteConfiguration
-from openedx.features.course_duration_limits.config import CONTENT_TYPE_GATING_STUDIO_UI_FLAG
+from openedx.features.content_type_gating.models import ContentTypeGatingConfig
+from openedx.features.course_duration_limits.config import CONTENT_TYPE_GATING_FLAG
 from student import auth
 from student.models import CourseEnrollment
 from student.roles import CourseInstructorRole, CourseStaffRole
@@ -458,7 +459,7 @@ def get_visibility_partition_info(xblock, course=None):
         if len(partition["groups"]) > 1 or any(group["selected"] for group in partition["groups"]):
             selectable_partitions.append(partition)
 
-    if CONTENT_TYPE_GATING_STUDIO_UI_FLAG.is_enabled():
+    if CONTENT_TYPE_GATING_FLAG.is_enabled() or ContentTypeGatingConfig.current(course=course.id).studio_override_enabled:
         selectable_partitions += get_user_partition_info(xblock, schemes=["content_type_gate"], course=course)
 
     # Now add the cohort user partitions.

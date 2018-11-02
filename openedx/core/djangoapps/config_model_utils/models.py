@@ -34,40 +34,14 @@ class StackedConfigurationModel(ConfigurationModel):
     STACKABLE_FIELDS = ('enabled',)
 
     enabled = models.NullBooleanField(default=None, verbose_name=_("Enabled"))
-    site = models.ForeignKey(Site, on_delete=models.CASCADE, null=True)
-    org = models.CharField(max_length=255, db_index=True, null=True)
+    site = models.ForeignKey(Site, on_delete=models.CASCADE, null=True, blank=True)
+    org = models.CharField(max_length=255, db_index=True, null=True, blank=True)
     course = models.ForeignKey(
         CourseOverview,
         on_delete=models.DO_NOTHING,
         null=True,
+        blank=True,
     )
-
-    @classmethod
-    def attribute_tuple(cls):
-        """
-        Returns a namedtuple with all attributes that can be overridden on this config model.
-
-        For example, if MyStackedConfig.STACKABLE_FIELDS = ('enabled', 'enabled_as_of', 'studio_enabled'),
-        then:
-
-            # These lines are the same
-            MyStackedConfig.attribute_tuple()
-            namedtuple('MyStackedConfigValues', ('enabled', 'enabled_as_of', 'studio_enabled'))
-
-            # attribute_tuple() behavior
-            MyStackedConfigValues = MyStackedConfig.attribute_tuple()
-            MyStackedConfigValues(True, '10/1/18', False).enabled  # True
-            MyStackedConfigValues(True, '10/1/18', False).enabled_as_of  # '10/1/18'
-            MyStackedConfigValues(True, '10/1/18', False).studio_enabled  # False
-        """
-        if hasattr(cls, '_attribute_tuple'):
-            return cls._attribute_tuple
-
-        cls._attribute_tuple = namedtuple(
-            '{}Values'.format(cls.__name__),
-            cls.STACKABLE_FIELDS
-        )
-        return cls._attribute_tuple
 
     @classmethod
     def current(cls, site=None, org=None, course=None):  # pylint: disable=arguments-differ
@@ -155,7 +129,7 @@ class StackedConfigurationModel(ConfigurationModel):
                 super(StackedConfigurationModel, cls).current(None, None, course)
             )
 
-        return cls.attribute_tuple()(**values)
+        return cls(**values)
 
     @classmethod
     def _org_from_course(cls, course_key):
