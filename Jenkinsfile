@@ -1,8 +1,8 @@
 def runPythonTests() {
     sshagent(credentials: ['jenkins-worker', 'jenkins-worker-pem'], ignoreMissing: true) {
         checkout changelog: false, poll: false, scm: [$class: 'GitSCM', branches: [[name: '${ghprbActualCommit}']],
-            doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [],
-            userRemoteConfigs: [[credentialsId: 'jenkins-worker',
+            doGenerateSubmoduleConfigurations: false, extensions: [[$class: 'CloneOption', honorRefspec: true,
+            noTags: true, shallow: true]], submoduleCfg: [], userRemoteConfigs: [[credentialsId: 'jenkins-worker',
             refspec: '+refs/heads/*:refs/remotes/origin/* +refs/pull/*:refs/remotes/origin/pr/*',
             url: 'git@github.com:edx/edx-platform.git']]]
         console_output = sh(returnStdout: true, script: 'bash scripts/all-tests.sh').trim()
@@ -107,7 +107,8 @@ pipeline {
             steps {
                 sshagent(credentials: ['jenkins-worker'], ignoreMissing: true) {
                     checkout changelog: false, poll: false, scm: [$class: 'GitSCM', branches: [[name: '${ghprbActualCommit}']],
-                        doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [],
+                        doGenerateSubmoduleConfigurations: false, extensions: [[$class: 'CloneOption',
+                        honorRefspec: true, noTags: true, shallow: true]], submoduleCfg: [],
                         userRemoteConfigs: [[credentialsId: 'jenkins-worker',
                         refspec: '+refs/heads/*:refs/remotes/origin/* +refs/pull/*:refs/remotes/origin/pr/*',
                         url: 'git@github.com:edx/edx-platform.git']]]
