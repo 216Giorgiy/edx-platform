@@ -89,6 +89,7 @@ from openedx.core.djangoapps.site_configuration import helpers as configuration_
 from openedx.core.djangoapps.util.user_messages import PageLevelMessages
 from openedx.core.djangolib.markup import HTML, Text
 from openedx.features.course_duration_limits.access import register_course_expired_message
+from openedx.features.course_duration_limits.config import CONTENT_TYPE_GATING_FLAG
 from openedx.features.course_experience import UNIFIED_COURSE_TAB_FLAG, course_home_url_name
 from openedx.features.course_experience.course_tools import CourseToolsPluginManager
 from openedx.features.course_experience.views.course_dates import CourseDatesFragmentView
@@ -984,6 +985,9 @@ def _progress(request, course_key, student_id):
     studio_url = get_studio_url(course, 'settings/grading')
     # checking certificate generation configuration
     enrollment_mode, _ = CourseEnrollment.enrollment_mode_for_user(student, course_key)
+
+    if CONTENT_TYPE_GATING_FLAG.is_enabled():
+        register_course_expired_message(request, course)
 
     context = {
         'course': course,

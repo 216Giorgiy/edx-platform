@@ -352,6 +352,7 @@ def _create_mock_json_request(user, data, method='POST'):
     request.session = {}
     return request
 
+
 def get_expiration_banner_text(user, course):
     # Get text for banner that messages user course expiration date
     # for different tests that depend on it.

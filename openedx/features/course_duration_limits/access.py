@@ -16,7 +16,7 @@ from lms.djangoapps.courseware.date_summary import verified_upgrade_deadline_lin
 from openedx.core.djangoapps.catalog.utils import get_course_run_details
 from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
 from openedx.core.djangoapps.util.user_messages import PageLevelMessages
-from openedx.core.djangolib.markup import HTML
+from openedx.core.djangolib.markup import HTML, Text
 from openedx.features.course_duration_limits.config import CONTENT_TYPE_GATING_FLAG
 
 MIN_DURATION = timedelta(weeks=4)
